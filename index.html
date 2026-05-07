@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="sw">
 <head>
@@ -6,118 +7,104 @@
     <title>m, light - Rahisisha Malipo</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 15px; margin: 0; background: #f8f9fa; }
-        .ml-container { max-width: 420px; margin: auto; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h2 { color: #7030A0; margin: 0; text-align: center; }
-        .slogan { color: #7030A0; margin: 0 0 20px 0; font-weight: bold; text-align: center; }
-        label { font-weight: 600; color: #333; display: block; margin-top: 15px; }
-        input { width: 100%; padding: 14px; font-size: 18px; margin: 8px 0; border-radius: 10px; border: 2px solid #ddd; box-sizing: border-box; }
-        input:focus { border-color: #7030A0; outline: none; }
-        button { width: 100%; padding: 16px; font-size: 18px; margin: 15px 0; border-radius: 10px; background: #7030A0; color: white; border: none; font-weight: bold; cursor: pointer; }
-        button:active { background: #5a2580; }
-        .pi-display { background: #f3e5f5; padding: 15px; border-radius: 10px; text-align: center; margin: 15px 0; }
-        #piAmount { font-size: 36px; font-weight: bold; color: #7030A0; }
-        .rate { color: #666; font-size: 14px; }
-        #status { text-align: center; font-weight: 600; min-height: 24px; color: #7030A0; }
-        .mauzo-container { margin-top: 20px; }
-        .mauzo-box { display: flex; justify-content: space-around; background: #e8f5e9; padding: 15px; border-radius: 10px; text-align: center; }
-        .mauzo-box h2 { margin: 5px 0 0 0; color: #2e7d32; font-size: 20px; }
-        .mauzo-box p { margin: 0; color: #555; font-size: 14px; }
-        .miamala { text-align: center; color: #666; margin-top: 10px; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #7D4CDB; text-align: center; margin: 0; }
+        .subtitle { color: #7D4CDB; text-align: center; margin-top: 5px; font-weight: bold; }
+        label { display: block; margin-top: 15px; font-weight: bold; }
+        input { width: 100%; padding: 12px; margin-top: 5px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        .result { background: #E8DDFF; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: center; }
+        .result h3 { margin: 0; color: #333; }
+        .result .amount { font-size: 32px; color: #7D4CDB; font-weight: bold; margin: 5px 0; }
+        .rate { font-size: 12px; color: #666; }
+        button { width: 100%; background: #7D4CDB; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 18px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+        button:disabled { background: #ccc; }
+        #status { text-align: center; margin-top: 10px; font-weight: bold; }
+        .success { color: green; }
+        .error { color: red; }
     </style>
 </head>
 <body>
-    <div class="ml-container">
-        <h2>m, light</h2>
-        <p class="slogan">Rahisisha Malipo</p>
+    <div class="container">
+        <h1>m, light</h1>
+        <div class="subtitle">Rahisisha Malipo</div>
         
         <label>Jina la Huduma Yako:</label>
-        <input type="text" id="hudumaName" value="Huduma Yangu" />
+        <input type="text" id="huduma" value="Huduma Yangu">
         
         <label>Weka kiasi cha TZS anachotakiwa kulipa:</label>
-        <input type="number" id="tshAmount" placeholder="3000" oninput="badiliPi()" />
+        <input type="number" id="tzs" value="3000" oninput="calculatePi()">
         
-        <div class="pi-display">
-            <h3 style="margin:0 0 5px 0;">Mteja alipe:</h3>
-            <p style="margin:0;"><span id="piAmount">0.0000</span> Pi</p>
-            <p class="rate">Rate: 1 Pi ≈ TZS <span id="piRate">2300</span></p>
+        <div class="result">
+            <h3>Mteja alipe:</h3>
+            <div class="amount"><span id="piAmount">1.3043</span> Pi</div>
+            <div class="rate">Rate: 1 Pi ≈ TZS 2,300</div>
         </div>
         
-        <button onclick="lipishaPi()">Tengeneza QR ya Malipo</button>
-        <p id="status"></p>
-        
-        <hr style="margin: 25px 0; border: 1px solid #eee;">
-        
-        <div class="mauzo-container">
-            <h3 style="text-align:center;">Mauzo ya Leo</h3>
-            <div class="mauzo-box">
-                <div><p>Jumla Pi</p><h2 id="jumlaPi">0.0000</h2></div>
-                <div><p>Makadirio TZS</p><h2 id="jumlaTZS">0</h2></div>
-            </div>
-            <p class="miamala">Idadi ya miamala: <span id="idadiMiamala">0</span></p>
-        </div>
+        <button id="payBtn" onclick="makePayment()">Lipa Sasa na Pi</button>
+        <div id="status"></div>
     </div>
 
     <script>
-        const Pi = window.Pi;
-        Pi.init({ version: "2.0", sandbox: true });
-        let currentRate = 2300;
-        document.getElementById('piRate').innerText = currentRate.toLocaleString();
-
-        function badiliPi() {
-            const tsh = document.getElementById('tshAmount').value;
-            const pi = tsh / currentRate;
-            document.getElementById('piAmount').innerText = pi.toFixed(4);
+        // Init Pi SDK
+        Pi.init({ version: "2.0", sandbox: false });
+        
+        const RATE = 2300;
+        
+        function calculatePi() {
+            const tzs = document.getElementById('tzs').value || 0;
+            const pi = (tzs / RATE).toFixed(4);
+            document.getElementById('piAmount').innerText = pi;
         }
-
-        async function lipishaPi() {
-            const amount = parseFloat(document.getElementById('piAmount').innerText);
-            const huduma = document.getElementById('hudumaName').value;
-            if(amount <= 0) return alert("Weka kiasi cha TZS kwanza");
-            document.getElementById('status').innerText = "Inaunganisha...";
+        
+        async function makePayment() {
+            const payBtn = document.getElementById('payBtn');
+            const status = document.getElementById('status');
+            payBtn.disabled = true;
+            status.innerHTML = "Inaunganisha...";
+            
             try {
-                const auth = await Pi.authenticate(['payments'], onIncompletePayment);
-                await Pi.createPayment({
-                    amount: amount,
-                    memo: `Malipo ya ${huduma} - m, light`,
-                    metadata: { huduma: huduma }
+                // 1. Authenticate user
+                const scopes = ['payments'];
+                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+                status.innerHTML = "Imethibitishwa: " + auth.user.username;
+                
+                // 2. Create payment - 0.01 Pi kwa test
+                const payment = await Pi.createPayment({
+                    amount: 0.01,
+                    memo: "Test payment kwa m, light App",
+                    metadata: { test: true }
                 }, {
                     onReadyForServerApproval: (paymentId) => {
-                        document.getElementById('status').innerText = "Mpe mteja amalize malipo...";
+                        status.innerHTML = "Inasubiri approval...";
+                        console.log("Ready:", paymentId);
                     },
                     onReadyForServerCompletion: (paymentId, txid) => {
-                        document.getElementById('status').innerText = "Malipo yamekamilika! ✅";
-                        rekodiMauzo({ amount: amount });
-                        document.getElementById('tshAmount').value = '';
-                        document.getElementById('piAmount').innerText = '0.0000';
+                        status.innerHTML = "<span class='success'>✅ Malipo yamekamilika! TXID: " + txid + "</span>";
+                        payBtn.disabled = false;
                     },
-                    onCancel: () => { document.getElementById('status').innerText = "Malipo yamesitishwa"; },
-                    onError: (error) => { document.getElementById('status').innerText = "Error: " + error; }
+                    onCancel: (paymentId) => {
+                        status.innerHTML = "<span class='error'>❌ Malipo yameghairiwa</span>";
+                        payBtn.disabled = false;
+                    },
+                    onError: (error, payment) => {
+                        status.innerHTML = "<span class='error'>❌ Error: " + error.message + "</span>";
+                        payBtn.disabled = false;
+                    }
                 });
-            } catch(err) {
-                document.getElementById('status').innerText = "Imeshindikana. Jaribu tena.";
+                
+            } catch (err) {
+                status.innerHTML = "<span class='error'>❌ " + err.message + "</span>";
+                payBtn.disabled = false;
             }
         }
-
-        function onIncompletePayment(payment) { console.log("Malipo ambayo hayajakamilika:", payment); }
-
-        function rekodiMauzo(paymentData) {
-            let miamalaYote = JSON.parse(localStorage.getItem('miamalaYote')) || [];
-            miamalaYote.push({ kiasiPi: paymentData.amount, tarehe: new Date().toISOString() });
-            localStorage.setItem('miamalaYote', JSON.stringify(miamalaYote));
-            hesabuMauzo();
+        
+        function onIncompletePaymentFound(payment) {
+            console.log("Incomplete payment found:", payment);
         }
-
-        function hesabuMauzo() {
-            const leo = new Date().toDateString();
-            let miamalaYote = JSON.parse(localStorage.getItem('miamalaYote')) || [];
-            let mauzoYaLeo = miamalaYote.filter(m => new Date(m.tarehe).toDateString() === leo);
-            const jumlaPi = mauzoYaLeo.reduce((sum, item) => sum + item.kiasiPi, 0);
-            document.getElementById('jumlaPi').innerText = jumlaPi.toFixed(4);
-            document.getElementById('jumlaTZS').innerText = Math.round(jumlaPi * currentRate).toLocaleString();
-            document.getElementById('idadiMiamala').innerText = mauzoYaLeo.length;
-        }
-        document.addEventListener('DOMContentLoaded', hesabuMauzo);
+        
+        // Calculate initial
+        calculatePi();
     </script>
 </body>
 </html>
