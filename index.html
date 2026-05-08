@@ -6,33 +6,51 @@
     <title>m, light - Step 10</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
-      Pi.init({ version: "2.0" });
+      // MUHIMU: sandbox: true kwa Testnet
+      Pi.init({ version: "2.0", sandbox: true });
       
       function lipaSasa() {
-        document.getElementById('btn').disabled = true;
-        document.getElementById('txt').innerText = "Inaunganisha...";
+        const btn = document.getElementById('btn');
+        const txt = document.getElementById('txt');
+        btn.disabled = true;
+        txt.innerText = "1. Inaomba ruhusa...";
         
         Pi.authenticate(['payments'], function(auth) {
+          txt.innerText = "2. Imeruhusiwa. Inatengeneza malipo...";
+          
           Pi.createPayment({
             amount: 0.001,
             memo: "Test payment m light",
-            metadata: { test: true }
+            metadata: {}
           }, {
-            onReadyForServerApproval: function(paymentId) {
-              document.getElementById('txt').innerText = "Inaidhinisha...";
+            onReadyForServerApproval: (paymentId) => {
+              txt.innerText = "3. Inaidhinisha...";
+              console.log("Approve:", paymentId);
             },
-            onReadyForServerCompletion: function(paymentId, txid) {
-              document.getElementById('txt').innerText = "Umefanikiwa! TxID: " + txid;
+            onReadyForServerCompletion: (paymentId, txid) => {
+              txt.innerText = "4. IMEFANIKIWA! TxID: " + txid;
+              btn.disabled = false;
+              // HAPA NDIO STEP 10 INAKUBALI
             },
-            onCancel: function(paymentId) {
-              document.getElementById('txt').innerText = "Umesitisha";
-              document.getElementById('btn').disabled = false;
+            onCancel: (paymentId) => {
+              txt.innerText = "Umesitisha";
+              btn.disabled = false;
             },
-            onError: function(error, payment) {
-              document.getElementById('txt').innerText = "Error: " + error;
-              document.getElementById('btn').disabled = false;
+            onError: (error, payment) => {
+              txt.innerText = "Payment Error: " + error;
+              btn.disabled = false;
+            },
+            // MUHIMU: Ongeza hii
+            onIncompletePaymentFound: (payment) => {
+              txt.innerText = "Inamaliza malipo ya zamani...";
+              console.log("Incomplete:", payment);
             }
           });
+        }, function(error) {
+          // HII ITAKUAMBIA TATIZO HALISI
+          txt.innerText = "AUTH IMEFAILI: " + error;
+          btn.disabled = false;
+          alert("Auth Error: " + error); // Itaonyesha popup ya error
         });
       }
     </script>
