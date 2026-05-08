@@ -5,39 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>m, light - Step 10</title>
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+      Pi.init({ version: "2.0" });
+      
+      function lipaSasa() {
+        document.getElementById('btn').disabled = true;
+        document.getElementById('txt').innerText = "Inaunganisha...";
+        
+        Pi.authenticate(['payments'], function(auth) {
+          Pi.createPayment({
+            amount: 0.001,
+            memo: "Test payment m light",
+            metadata: { test: true }
+          }, {
+            onReadyForServerApproval: function(paymentId) {
+              document.getElementById('txt').innerText = "Inaidhinisha...";
+            },
+            onReadyForServerCompletion: function(paymentId, txid) {
+              document.getElementById('txt').innerText = "Umefanikiwa! TxID: " + txid;
+            },
+            onCancel: function(paymentId) {
+              document.getElementById('txt').innerText = "Umesitisha";
+              document.getElementById('btn').disabled = false;
+            },
+            onError: function(error, payment) {
+              document.getElementById('txt').innerText = "Error: " + error;
+              document.getElementById('btn').disabled = false;
+            }
+          });
+        });
+      }
+    </script>
 </head>
 <body style="font-family:sans-serif;text-align:center;padding-top:100px;background:#f5f5f5">
     <h1 style="color:#6B46C1">m, light</h1>
     <p>Rahisisha Malipo</p>
-    <button id="btn" onclick="lipa()" style="background:#6B46C1;color:white;border:none;padding:15px 30px;font-size:18px;border-radius:10px">Lipa Sasa na Pi</button>
+    <button id="btn" onclick="lipaSasa()" style="background:#6B46C1;color:white;border:none;padding:15px 30px;font-size:18px;border-radius:10px">
+        Lipa Sasa na Pi
+    </button>
     <p id="txt" style="margin-top:20px;font-weight:bold">Tayari kulipa</p>
-
-<script>
-    Pi.init({ version: "2.0", sandbox: true });
-
-    function lipa() {
-        document.getElementById('txt').innerText = "Inaunganisha...";
-        document.getElementById('btn').disabled = true;
-
-        Pi.authenticate(['payments']).then(function(auth) {
-  
-Pi.createPayment({
-  amount: 0.001,
-  memo: "Test Payment",
-  metadata: { test: true },
-  onReadyForServerApproval: function(paymentId) {
-    document.getElementById('txt').innerText = "Inaidhinisha...";
-    Pi.approvePayment(paymentId);
-  },
-  onReadyForServerCompletion: function(paymentId, txid) {
-    document.getElementById('txt').innerText = "Umefanikiwa! TxID: " + txid;
-  },
-  onCancel: function(paymentId) {
-    document.getElementById('txt').innerText = "Umesitisha";
-    document.getElementById('btn').disabled = false;
-  },
-  onError: function(error, payment) {
-    document.getElementById('txt').innerText = "Error: " + error;
-    document.getElementById('btn').disabled = false;
-  }
-});
+</body>
+</html>
