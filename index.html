@@ -20,35 +20,24 @@
         document.getElementById('btn').disabled = true;
 
         Pi.authenticate(['payments']).then(function(auth) {
-            Pi.createPayment({
-                amount: 0.001,
-                memo: "Step 10 Test",
-                metadata: { test: true }
-            }, {
-                onReadyForServerApproval: function(paymentId) {
-                    document.getElementById('txt').innerText = "Inaidhinisha...";
-                    Pi.approvePayment(paymentId);
-                },
-                onReadyForServerCompletion: function(paymentId, txid) {
-                    document.getElementById('txt').innerText = "Umefanikiwa! TxID: " + txid;
-                    document.getElementById('btn').innerText = "✅ Umeshinda!";
-                    document.getElementById('btn').style.background = "green";
-                    Pi.completePayment(paymentId);
-                },
-                onCancel: function(paymentId) {
-                    document.getElementById('txt').innerText = "Umesitisha";
-                    document.getElementById('btn').disabled = false;
-                },
-                onError: function(error, payment) {
-                    document.getElementById('txt').innerText = "Error: " + error;
-                    document.getElementById('btn').disabled = false;
-                }
-            });
-        }).catch(function(error) {
-            document.getElementById('txt').innerText = "Login failed: " + error;
-            document.getElementById('btn').disabled = false;
-        });
-    }
-</script>
-</body>
-</html>
+  
+Pi.createPayment({
+  amount: 0.001,
+  memo: "Test Payment",
+  metadata: { test: true },
+  onReadyForServerApproval: function(paymentId) {
+    document.getElementById('txt').innerText = "Inaidhinisha...";
+    Pi.approvePayment(paymentId);
+  },
+  onReadyForServerCompletion: function(paymentId, txid) {
+    document.getElementById('txt').innerText = "Umefanikiwa! TxID: " + txid;
+  },
+  onCancel: function(paymentId) {
+    document.getElementById('txt').innerText = "Umesitisha";
+    document.getElementById('btn').disabled = false;
+  },
+  onError: function(error, payment) {
+    document.getElementById('txt').innerText = "Error: " + error;
+    document.getElementById('btn').disabled = false;
+  }
+});
