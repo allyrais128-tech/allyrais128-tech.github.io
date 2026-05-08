@@ -1,48 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>m light</title>
-  <meta charset="UTF-8">
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>m, light - Step 10</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 </head>
-<body style="text-align:center; font-family:sans-serif; padding:50px;">
-  <h1 style="color:#8B5CF6;">m, light</h1>
-  <p>Rahisisha Malipo</p>
-  <button onclick="lipaNaPi()" style="background:#8B5CF6; color:white; padding:15px 30px; border:none; border-radius:10px; font-size:18px;">
-    Lipa Sasa na Pi
-  </button>
-  
-  <div id="result" style="margin-top:20px;"></div>
+<body style="font-family:sans-serif;text-align:center;padding-top:100px;background:#f5f5f5">
+    <h1 style="color:#6B46C1">m, light</h1>
+    <p>Rahisisha Malipo</p>
+    <button id="btn" onclick="lipa()" style="background:#6B46C1;color:white;border:none;padding:15px 30px;font-size:18px;border-radius:10px">Lipa Sasa na Pi</button>
+    <p id="txt" style="margin-top:20px;font-weight:bold">Tayari kulipa</p>
 
-  <script>
+<script>
     Pi.init({ version: "2.0", sandbox: true });
-    
-    function lipaNaPi() {
-      document.getElementById('result').innerText = "Inaunganisha...";
-      
-      Pi.authenticate(['payments'], function(auth) {
-        document.getElementById('result').innerText = "Karibu " + auth.user.username;
-        
-        Pi.createPayment({
-          amount: 0.001,
-          memo: "Test m light",
-          metadata: {}
-        }, {
-          onReadyForServerApproval: (paymentId) => {
-            document.getElementById('result').innerText = "Malipo tayari: " + paymentId;
-          },
-          onReadyForServerCompletion: (paymentId, txid) => {
-            document.getElementById('result').innerText = "Umefanikiwa! TxID: " + txid;
-          },
-          onCancel: (paymentId) => {
-            document.getElementById('result').innerText = "Umefutiza malipo";
-          },
-          onError: (error, payment) => {
-            document.getElementById('result').innerText = "Error: " + error;
-          }
+
+    function lipa() {
+        document.getElementById('txt').innerText = "Inaunganisha...";
+        document.getElementById('btn').disabled = true;
+
+        Pi.authenticate(['payments']).then(function(auth) {
+            Pi.createPayment({
+                amount: 0.001,
+                memo: "Step 10 Test",
+                metadata: { test: true }
+            }, {
+                onReadyForServerApproval: function(paymentId) {
+                    document.getElementById('txt').innerText = "Inaidhinisha...";
+                    Pi.approvePayment(paymentId);
+                },
+                onReadyForServerCompletion: function(paymentId, txid) {
+                    document.getElementById('txt').innerText = "Umefanikiwa! TxID: " + txid;
+                    document.getElementById('btn').innerText = "✅ Umeshinda!";
+                    document.getElementById('btn').style.background = "green";
+                    Pi.completePayment(paymentId);
+                },
+                onCancel: function(paymentId) {
+                    document.getElementById('txt').innerText = "Umesitisha";
+                    document.getElementById('btn').disabled = false;
+                },
+                onError: function(error, payment) {
+                    document.getElementById('txt').innerText = "Error: " + error;
+                    document.getElementById('btn').disabled = false;
+                }
+            });
+        }).catch(function(error) {
+            document.getElementById('txt').innerText = "Login failed: " + error;
+            document.getElementById('btn').disabled = false;
         });
-      });
     }
-  </script>
+</script>
 </body>
 </html>
