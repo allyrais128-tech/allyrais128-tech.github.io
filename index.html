@@ -22,7 +22,17 @@
             amount: 0.001,
             memo: "Test payment m light",
             metadata: {}
-          }, {
+          }, {Pi.createPayment({
+  amount: 0.001,
+  memo: "Test payment m light",
+  metadata: {},
+  sandbox: true   // <-- Ongeza hii line
+}, {
+  onReadyForServerApproval: (paymentId) => { ... },
+  onReadyForServerCompletion: (paymentId, txid) => { ... },
+  onCancel: (paymentId) => { ... },
+  onError: (error, paymentId) => { ... }
+});
             onReadyForServerApproval: (paymentId) => {
               txt.innerText = "3. Inaidhinisha...";
               console.log("Approve:", paymentId);
