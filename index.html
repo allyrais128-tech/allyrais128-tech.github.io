@@ -3,46 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rahisisha Malipo</title>
-  
-  <!-- Pi SDK -->
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-<script>
-  Pi.init({ version: "2.0", sandbox: "true" });
-
-  async function lipaSasa() {
-    try {
-      // Omba ruhusa ya payments kwanza
-      const scopes = ['username', 'payments'];
-      const auth = await Pi.authenticate(scopes);
-      console.log("Imelogin kama:", auth.user.username);
-
-      // Fanya malipo
-      const paymentData = {
-        amount: 0.01,
-        memo: "Jaribio la malipo",
-        metadata: { item: "test" }
-      };
-
-      const callbacks = {
-        onReadyForServerApproval: function(paymentId) {
-          document.getElementById("txt").innerText = "Inasubiri approval...";
-        },
-        onReadyForServerCompletion: function(paymentId, txid) {
-          document.getElementById("txt").innerText = "Malipo yamekamilika! ✅";
-        },
-        onCancel: function(paymentId) {
-          document.getElementById("txt").innerText = "Malipo yamefutwa";
-        },
-        onError: function(error) {
-          alert("Hitilafu: " + error);
-        }
-      };
-
-      await Pi.createPayment(paymentData, callbacks);
-      
-    } catch (error) {
-      alert("Hitilafu ya kuanzisha malipo: " + error);
+  <title>Jaribio la Malipo ya Pi</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+      background: #f5f5f5;
     }
-  }
-</script>
+    button {
+      background: #7c3aed;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #6d28d9;
+    }
+    #txt {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #333;
+    }
+  </style>
+  
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <script>
+    Pi.init({ version: "2.0", sandbox: "true" });
+
+    async function lipaSasa() {
+      try {
+        // Omba ruhusa ya payments kwanza
+        const scopes = ['username', 'payments'];
+        const auth = await Pi.authenticate(scopes);
+        console.log("Imelogin kama:", auth.user.username);
+
+        // Fanya malipo
+        const paymentData = {
+          amount: 0.01,
+          memo: "Jaribio la malipo",
+          metadata: { item: "test" }
+        };
+
+        const callbacks = {
+          onReadyForServerApproval: function(paymentId) {
+            document.getElementById("txt").innerText = "Inasubiri approval...";
+          },
+          onReadyForServerCompletion: function(paymentId, txid) {
+            document.getElementById("txt").innerText = "Malipo yamekamilika! ✅";
+          },
+          onCancel: function(paymentId) {
+            document.getElementById("txt").innerText = "Malipo yamefutwa";
+          },
+          onError: function(error) {
+            alert("Hitilafu: " + error);
+          }
+        };
+
+        await Pi.createPayment(paymentData, callbacks);
+        
+      } catch (error) {
+        alert("Hitilafu ya kuanzisha malipo: " + error);
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <h2>Jaribio la Malipo ya Pi</h2>
+  <p>Bonyeza kitufe hapa chini kulipa 0.01 Testnet Pi</p>
+  
+  <button onclick="lipaSasa()">Lipa Sasa na Pi</button>
+  
+  <p id="txt"></p>
+</body>
+</html>
