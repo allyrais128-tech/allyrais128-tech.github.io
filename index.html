@@ -1,76 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="sw">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>m, light - Step 10</title>
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <script>
-      // MUHIMU: sandbox: true kwa Testnet
-      Pi.init({ version: "2.0", sandbox: true });
-      
-      function lipaSasa() {
-        const btn = document.getElementById('btn');
-        const txt = document.getElementById('txt');
-        btn.disabled = true;
-        txt.innerText = "1. Inaomba ruhusa...";
-        
-        Pi.authenticate(['payments'], function(auth) {
-          txt.innerText = "2. Imeruhusiwa. Inatengeneza malipo...";
-          
-          Pi.createPayment({
-            amount: 0.001,
-            memo: "Test payment m light",
-            metadata: {}
-          }, {Pi.createPayment({
-  amount: 0.001,
-  memo: "Test payment m light",
-  metadata: {},
-  sandbox: true   // <-- Ongeza hii line
-}, {
-  onReadyForServerApproval: (paymentId) => { ... },
-  onReadyForServerCompletion: (paymentId, txid) => { ... },
-  onCancel: (paymentId) => { ... },
-  onError: (error, paymentId) => { ... }
-});
-            onReadyForServerApproval: (paymentId) => {
-              txt.innerText = "3. Inaidhinisha...";
-              console.log("Approve:", paymentId);
-            },
-            onReadyForServerCompletion: (paymentId, txid) => {
-              txt.innerText = "4. IMEFANIKIWA! TxID: " + txid;
-              btn.disabled = false;
-              // HAPA NDIO STEP 10 INAKUBALI
-            },
-            onCancel: (paymentId) => {
-              txt.innerText = "Umesitisha";
-              btn.disabled = false;
-            },
-            onError: (error, payment) => {
-              txt.innerText = "Payment Error: " + error;
-              btn.disabled = false;
-            },
-            // MUHIMU: Ongeza hii
-            onIncompletePaymentFound: (payment) => {
-              txt.innerText = "Inamaliza malipo ya zamani...";
-              console.log("Incomplete:", payment);
-            }
-          });
-        }, function(error) {
-          // HII ITAKUAMBIA TATIZO HALISI
-          txt.innerText = "AUTH IMEFAILI: " + error;
-          btn.disabled = false;
-          alert("Auth Error: " + error); // Itaonyesha popup ya error
-        });
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rahisisha Malipo</title>
+  
+  <!-- Pi SDK -->
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <script>
+    // Anzisha Pi SDK kwenye Sandbox mode
+    Pi.init({ version: "2.0", sandbox: "true" });
+
+    // Function ya malipo
+    async function lipaSasa() {
+      const paymentData = {
+        amount: 0.01,
+        memo: "Jaribio la malipo",
+        metadata: { item: "test" }
+      };
+
+      const callbacks = {
+        onReadyForServerApproval: function(paymentId) {
+          console.log("Payment ready:", paymentId);
+          document.getElementById("txt").innerText = "Inasubiri approval...";
+        },
+        onReadyForServerCompletion: function(paymentId, txid) {
+          console.log("Payment completed:", paymentId, txid);
+          document.getElementById("txt").innerText = "Malipo yamekamilika! ✅";
+        },
+        onCancel: function(paymentId) {
+          document.getElementById("txt").innerText = "Malipo yamefutwa";
+        },
+        onError: function(error, payment) {
+          alert("Hitilafu: " + error);
+          document.getElementById("txt").innerText = "Kuna hitilafu";
+        }
+      };
+
+      try {
+        await Pi.createPayment(paymentData, callbacks);
+      } catch (error) {
+        alert("Hitilafu ya kuanzisha malipo: " + error);
       }
-    </script>
+    }
+  </script>
 </head>
-<body style="font-family:sans-serif;text-align:center;padding-top:100px;background:#f5f5f5">
-    <h1 style="color:#6B46C1">m, light</h1>
-    <p>Rahisisha Malipo</p>
-    <button id="btn" onclick="lipaSasa()" style="background:#6B46C1;color:white;border:none;padding:15px 30px;font-size:18px;border-radius:10px">
-        Lipa Sasa na Pi
-    </button>
-    <p id="txt" style="margin-top:20px;font-weight:bold">Tayari kulipa</p>
+
+<body style="font-family:sans-serif; text-align:center; padding-top:100px; background:#f5f5f5;">
+  <h1 style="color:#6B46C1;">Rahisisha Malipo</h1>
+  <p>Bonyeza chini kulipa kwa Testnet Pi</p>
+  
+  <button id="btn" onclick="lipaSasa()" 
+    style="background:#6B46C1; color:white; border:none; padding:15px 30px; 
+           font-size:18px; border-radius:10px; cursor:pointer;">
+    Lipa Sasa na Pi
+  </button>
+  
+  <p id="txt" style="margin-top:20px; font-weight:bold;">Tayari kulipa</p>
 </body>
 </html>
